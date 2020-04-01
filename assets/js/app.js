@@ -78,6 +78,8 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
     $scope.logout = () => {
         $scope.currentUser.destroy();
         $scope.currentUser = null;
+        $scope.currentTarjeta = null;
+        $scope.currentProyecto = null;
     };
 
     $scope.login = () => {
@@ -309,6 +311,8 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
         if (currentUser) return;
 
         $scope.currentUser = null;
+        $scope.currentTarjeta = null;
+        $scope.currentProyecto = null;
 
         errorMessage('Ya no estás en la listad de miembros');
     }
