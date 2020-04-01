@@ -212,7 +212,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <form ng-show="checkOwner()">
+                                <div ng-show="checkOwner()">
                                     <hr />
                                     <label>Crear tarjeta</label>
                                     <br />
@@ -236,27 +236,29 @@
                                         </div>
                                     </div>
                                     <hr class="my-2" />
-                                    <div class="dropdown">
-                                        <div class="input-group">
+                                    <form ng-submit="createTarjeta()">
+                                        <div class="dropdown">
+                                            <div class="input-group">
 
-                                            <input class="form-control" ng-model="nombreTarjeta" autocomplete="off" data-toggle="dropdown" />
-                                            <div class="auto-complete dropdown-menu h-100 overflow-auto">
+                                                <input class="form-control" ng-model="nombreTarjeta" autocomplete="off" data-toggle="dropdown" />
+                                                <div class="auto-complete dropdown-menu h-100 overflow-auto">
 
-                                                <div class="dropdown-item"
-                                                     ng-repeat="opt in optionsVisible(options, nombreTarjeta)"
-                                                     ng-click="selectOption(opt.name)">
-                                                    {{ opt.name }}
-                                                    <br />
-                                                    <span class="mr-1 badge badge-{{colors[label.color] || 'default'}}" ng-repeat="label in opt.labels">{{label.name}}</span>
+                                                    <div class="dropdown-item"
+                                                         ng-repeat="opt in optionsVisible(options, nombreTarjeta)"
+                                                         ng-click="selectOption(opt.name)">
+                                                        {{ opt.name }}
+                                                        <br />
+                                                        <span class="mr-1 badge badge-{{colors[label.color] || 'default'}}" ng-repeat="label in opt.labels">{{label.name}}</span>
+                                                    </div>
+
                                                 </div>
-
-                                            </div>
-                                            <div class="input-group-btn">
-                                                <button class="btn" type="button" ng-click="createTarjeta()">Crear</button>
+                                                <div class="input-group-btn">
+                                                    <button class="btn" type="submit" ng-click="">Crear</button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </form>
+                                    </form>
+                                </div>
 
                             </div>
 

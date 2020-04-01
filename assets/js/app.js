@@ -113,6 +113,11 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
     };
 
     $scope.createTarjeta = () => {
+        if (!$scope.nombreTarjeta || $scope.nombreTarjeta.length < 4) {
+            errorMessage('Tenes que ingresar un nombre para la tarjeta a puntuar');
+            return;
+        }
+
         $scope.currentTarjeta = new Tarjeta($scope.nombreTarjeta);
         $scope.nombreTarjeta = null;
     };
