@@ -246,19 +246,19 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
     function successMessage(msj) {
         Notification.success({
             message: `<i class="far fa-check-circle mr-1"></i> ${msj}`
-        })
+        });
     }
 
     function warningMessage(msj) {
         Notification.warning({
             message: `<i class="fa fa-thumbs-up mr-1"></i> ${msj}`
-        })
+        });
     }
 
     function errorMessage(msj) {
         Notification.error({
             message: `<i class="fa fa-thumbs-down mr-1"></i> ${msj}`
-        })
+        });
     }
 
     function buscar() {
@@ -284,12 +284,20 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
             $scope.optionsList = d.map(m => ({
                 name: m.name
             }));
-        })
+        });
     }
 
     function checkActiveUsers() {
         getList(activeUsersListId, d => {
+
+            let users = $scope.activeUsers.filter(m => !m.hasVoted()).map(m => m.idCard);
+
             $scope.activeUsers = d;
+
+            $scope.activeUsers
+                .filter(m => users.includes(m.idCard) && m.hasVoted())
+                .forEach(m =>
+                    successMessage(`El usuario ${m.nombre} voto ${m.getPuntaje()}`));
 
             checkCurrentUser();
         });
