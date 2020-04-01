@@ -1,0 +1,79 @@
+body {
+    font-family: helvetica;
+}
+
+.form-control {
+    font-size: 14px;
+}
+
+.main-container {
+    position: relative;
+    /*min-height: 800px;*/
+    padding-top: 45px;
+}
+
+.dropdown-item {
+    word-break: break-word !important;
+    white-space: normal;
+}
+
+.dropdown-menu {
+    height: auto !important;
+    min-height: 100px;
+    max-height: 400px !important;
+    width: 100%;
+    font-size: 12px;
+}
+
+.auto-complete.dropdown-menu {
+    min-height: inherit;
+    max-height: 200px !important;
+}
+
+.custom-badge {
+    /*position: absolute;*/
+    border-radius: 50em;
+    -moz-border-radius: 50em;
+    -webkit-border-radius: 50em;
+    font-size: 11px;
+    color: #fff;
+    /*top: 0;
+            right: 0;*/
+    /*background: #fc8675;
+            border: 1px solid #fc8675;*/
+    text-shadow: none;
+    font-weight: 700;
+    line-height: 16px;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+}
+
+#top-nav .nav-notification .dropdown-menu {
+    right: 0 !important;
+    left: auto !important;
+    top: 95% !important;
+    transform: none !important;
+}
+
+#top-nav .dropdown-toggle::after {
+    content: none;
+}
+
+.reset-b {
+    border: none;
+    background: no-repeat;
+    padding: 0;
+}
+
+.visible-hover .visible-hover-item {
+    display: none;
+}
+
+.visible-hover:hover .visible-hover-item {
+    display: inline-block;
+}
+
+.numbers-list .card-body {
+    border: dotted 2px #f0f0f0;
+}
