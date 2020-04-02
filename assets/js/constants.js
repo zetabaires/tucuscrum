@@ -16,3 +16,6 @@ const scoreId = '5e822b4bd8dc2c669b88c9b0';
 const boardId = '5dd54a2725bf3b8e854e64bb';
 
 const enableTimer = true;
+
+const timerDelay = 1;
+const avarageQuantityPercentaje = 40;

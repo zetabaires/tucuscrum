@@ -18,11 +18,12 @@
     <script src="assets/js/tools.js"></script>
     <script src="assets/js/constants.js"></script>
 
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/functions.js"></script>
+    <script src="assets/js/app.module.js"></script>
 </head>
 <body ng-app="app" ng-controller="appcontroller">
 
-    <div id="top-nav" class="fixed skin-6" ng-show="!!currentUser">
+    <div id="top-nav" class="fixed skin-6" ng-show="!!currentUser()">
         <a href="#" class="brand">
             <span>Tucu's</span>
             <span class="text-toggle"> Scrum</span>
@@ -30,7 +31,7 @@
         <ul class="nav-notification clearfix">
             <li class="profile dropdown open">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                    <strong>{{ currentUser.nombre }}</strong>
+                    <strong>{{ currentUser().nombre }}</strong>
                     <span><i class="fa fa-chevron-down"></i></span>
                 </a>
                 <ul class="dropdown-menu px-2">
@@ -39,7 +40,7 @@
                             <img src="assets/img/user.jpg" alt="User Avatar">
                             <!--<i class="fa fa-user fa-lg"></i>-->
                             <div class="detail">
-                                <strong>{{ currentUser.nombre }}</strong>
+                                <strong>{{ currentUser().nombre }}</strong>
                                 <p class="grey">test@email.com</p>
                             </div>
                         </a>
@@ -58,7 +59,7 @@
 
     <div class="main-container grayed">
 
-        <section id="loginForm" name="login" ng-hide="currentUser">
+        <section class="ng-hide" id="loginForm" ng-class="{ 'disabled loding': loadingUser }" name="login" ng-hide="currentUser()">
 
             <div class="login-wrapper fadeInUp">
                 <div class="login-widget">
@@ -80,22 +81,18 @@
         </section>
 
         <div class="container-fluid">
-            <section name="authenticated" ng-show="!!currentUser">
+            <section class="ng-hide" name="authenticated" ng-show="!!currentUser()">
 
-                <section name="withoutproject" ng-show="!currentProyecto">
-
+                <section class="ng-hide" name="withoutproject" ng-class="{ 'disabled loding': loadingProyecto }" ng-show="!currentProyecto()">
 
                     <div class="login-wrapper">
                         <div class="login-widget">
-                            <div ng-show="!isAdmin">
+                            <div ng-show="!isAdmin()">
                                 <div class="alert alert-warning">
                                     No hay ningun proyecto cargado aun
                                 </div>
-                                <!--<div class="text-center">
-                                    <button class="btn btn-info" onclick="location.reload()">Reintentar</button>
-                                </div>-->
                             </div>
-                            <div class="login-panel" ng-show="isAdmin">
+                            <div class="login-panel" ng-show="isAdmin()">
                                 <div class="login-header">
                                     <h1 class="fadeInUp animation-delay8">
                                         <a href="#">Crear proyecto</a>
@@ -113,12 +110,12 @@
 
                 </section>
 
-                <section name="withproject" ng-show="currentProyecto">
+                <section class="ng-hide" name="withproject" ng-class="{ 'disabled loding': loadingUser }" ng-show="currentProyecto()">
 
                     <div class="main-header clearfix">
                         <div class="page-title">
-                            <h2 class="no-margin">{{ currentProyecto.nombre }}</h2>
-                            <span>Creada por "{{ currentProyecto.creadoPor.nombre }}"</span>
+                            <h2 class="no-margin">{{ currentProyecto().nombre }}</h2>
+                            <span>Creada por "{{ currentProyecto().creadoPor.nombre }}"</span>
                         </div>
 
                         <ul class="page-stats">
@@ -130,18 +127,18 @@
                                 <span id="visits" class="sparkline"><canvas width="79" height="35" style="display: inline-block; width: 79px; height: 35px; vertical-align: top;"></canvas></span>
                             </li>
                             <!--<li>
-                                                        <div class="value">
-                                                            <span>My balance</span>
-                                                            <h4>$<strong id="currentBalance">32012</strong></h4>
-                                                        </div>
-                                                        <span id="balances" class="sparkline">
-                                                            <canvas width="69" height="35" style="        display: inline-block;
-                                    width: 69px;
-                                    height: 35px;
-                                    vertical-align: top;
-                            "></canvas>
-                                                        </span>
-                                                    </li>-->
+                                            <div class="value">
+                                                <span>My balance</span>
+                                                <h4>$<strong id="currentBalance">32012</strong></h4>
+                                            </div>
+                                            <span id="balances" class="sparkline">
+                                                <canvas width="69" height="35" style="        display: inline-block;
+                        width: 69px;
+                        height: 35px;
+                        vertical-align: top;
+                "></canvas>
+                                            </span>
+                                        </li>-->
                         </ul>
                     </div>
 
@@ -149,18 +146,18 @@
 
                         <div class="row">
                             <div class="col-8">
-                                <div class="alert alert-warning" ng-show="!currentTarjeta">
+                                <div class="alert alert-warning" ng-show="!currentTarjeta()">
                                     No hay ninguna tarjeta cargada aun
                                 </div>
 
-                                <div ng-show="!!currentTarjeta">
+                                <div ng-show="!!currentTarjeta()" ng-class="{ 'disabled loding': loadingTarjeta }">
 
-                                    <h3 class="mb-3">{{ currentTarjeta.nombre }}</h3>
+                                    <h3 class="mb-3">{{ currentTarjeta().nombre }}</h3>
                                     <hr />
 
                                     <div class="row numbers-list">
-                                        <div class="col-3" ng-repeat="item in numbers" style="cursor: pointer">
-                                            <div class="card mb-4 {{ checkCard(item) ? 'bg-info': '' }}" ng-click="currentUser.puntuar(item)">
+                                        <div class="col-3 {{ showingResults() ? 'disabled' : '' }}" ng-repeat="item in numbers" style="cursor: pointer">
+                                            <div class="card mb-4 {{ checkCard(item) || checkCardResult(item) ? 'bg-info': '' }}" ng-click="puntuar(item)">
                                                 <div class="card-body text-center">
                                                     <h4 class="no-margin">
                                                         {{item}}
@@ -186,14 +183,14 @@
                                     </h3>
                                     <hr class="border-dark" />
                                     <div class="row">
-                                        <div class="col-6" ng-repeat="user in activeUsers">
+                                        <div class="col-6" ng-repeat="user in activeUsers()">
 
                                             <div class="row mb-2 visible-hover">
 
                                                 <div class="col-8">
                                                     <i class="fa fa-user mr-1"></i>
                                                     {{ user.nombre }}
-                                                    <button class="reset-b visible-hover-item ml-2 bounceIn" ng-show="isAdmin" data-toggle="tooltip" title="Quitar usuario" ng-click="deleteUser(user)">
+                                                    <button class="reset-b visible-hover-item ml-2 bounceIn" ng-show="isAdmin()" data-toggle="tooltip" title="Quitar usuario" ng-click="deleteUser(user)">
                                                         <i class="far fa-times-circle text-danger mr-1"></i>
                                                     </button>
                                                     <i class="fa fa-exclamation-triangle ml-1"
@@ -203,8 +200,8 @@
                                                        ng-show="checkResult(user) && checkMaxMin(user).any"></i>
                                                 </div>
                                                 <div class="col-4 text-right">
-                                                    <i class="far fa-check-circle text-success" ng-hide="showingResults || user.getCurrentPuntaje().numero == 0"></i>
-                                                    <span class="custom-badge bg-info float-right" ng-show="checkResult(user)">{{ user.getCurrentPuntaje().numero }}</span>
+                                                    <i class="far fa-check-circle text-success" ng-hide="showingResults() || user.getScore(currentTarjeta()) == 0"></i>
+                                                    <span class="custom-badge bg-info float-right" ng-show="checkResult(user)">{{ user.getScore(currentTarjeta()) }}</span>
                                                 </div>
 
                                             </div>
@@ -269,15 +266,21 @@
                                 <div class="alert alert-warning" ng-show="!oldTarjetas().any()">
                                     No hay historicos para mostrar
                                 </div>
+
                                 <section class="border-bottom" ng-repeat="tarjeta in oldTarjetas()">
-                                    <!--<button class="btn btn-info btn-sm float-right" >
-                                    </button>-->
                                     <div class="py-2" style="cursor: pointer" data-toggle="collapse" data-target="#tbl_{{tarjeta.id}}">
-                                        <i class="fa fa-angle-down float-right mt-1"></i>
-                                        {{ tarjeta.nombre }}
-                                        <span class="badge badge-info float-right mr-4">{{ getPuntajeTarjeta(tarjeta) }}</span>
+
+                                        <div class="row">
+                                            <div class="col-10">
+                                                {{ tarjeta.nombre }}
+                                            </div>
+                                            <div class="col-2 text-right">
+                                                <span class="badge badge-info mr-2">{{ getPuntajeTarjeta(tarjeta) }}</span>
+                                                <i class="fa fa-angle-down mt-1"></i>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <table class="table table-sm table-bordered table-striped collapse mt-1" id="tbl_{{tarjeta.id}}">
+                                    <table class="table table-sm table-bordered table-striped bg-white collapse mt-1" id="tbl_{{tarjeta.id}}">
                                         <tr>
                                             <th>Usuario</th>
                                             <th>Puntos</th>

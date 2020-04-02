@@ -14,16 +14,106 @@ Array.prototype.count = function (exp) {
     return this.filter(exp || (() => true)).length;
 };
 
-function getCurrentUser() {
-    let data = sessionStorage.getItem('currentuser');
+Array.prototype.add = function (item) {
+    this.push(item);
 
-    if (data) return JSON.parse(data);
+    return item;
+};
 
-    return null;
+Array.prototype.clean = function () {
+    this.length = 0;
+};
+
+Array.prototype.remove = function (item) {
+    $this = this;
+
+    let old = Object.assign([], $this);
+
+    $this.clean();
+
+    old.filter(m => !item(m)).forEach(m =>
+        $this.push(m));
+
+    return $this;
+};
+
+Array.prototype.set = function (data, identify) {
+    $this = this;
+
+    let _temp = [];
+
+    data.forEach((m, i) => {
+        _temp.push(m);
+
+        // item
+        let current = $this.find(x => identify(x, m));
+
+        if (!current)
+            current = $this.push(m);
+
+        // props
+        for (let p in m) {
+            if (current[p] !== m[p]) {
+                if ($this.changeHandler)
+                    $this.changeHandler(current, p);
+
+                current[p] = m[p];
+            }
+        }
+    });
+
+    $this.remove(m => !_temp.find(x => identify(x, m)));
+
+    return $this;
+};
+
+Array.prototype.first = function (exp) {
+    let r = this.filter(exp || (() => true));
+
+    if (!r.any())
+        return null;
+
+    return r[0];
+};
+
+function toPromise(func) {
+    return new Promise(function (resolve, reject) {
+        return resolve(func());
+    });
 }
 
-function setCurrentUser(data) {
-    return sessionStorage.setItem('currentuser', JSON.stringify(data));
+function toPromiseResult(result) {
+    return toPromise(() => result);
+}
+
+function NotificationProvider($notification) {
+    this.ok = function (msj) {
+        $notification.success({
+            message: `<i class="far fa-check-circle mr-1"></i> ${msj}`
+        });
+    };
+
+    this.message = function (msj) {
+        $notification.warning({
+            message: `<i class="fa fa-thumbs-up mr-1"></i> ${msj}`
+        });
+    };
+
+    this.error = function (msj) {
+        $notification.error({
+            message: `<i class="fa fa-thumbs-down mr-1"></i> ${msj}`
+        });
+    };
+}
+
+function getCurrentUserSessionId() {
+    return sessionStorage.getItem('currentUserSessionId');
+}
+
+function setCurrentUser(userId, forced) {
+    if (!forced && !userId) throw Error("El usuerId es null");
+
+    return sessionStorage.setItem('currentUserSessionId', userId);
 }
 
 function guid() {
@@ -33,12 +123,12 @@ function guid() {
     });
 }
 
-function getCurrentPuntaje($scope, user) {
-    if (!$scope.currentTarjeta) return 0;
+function getCurrentScore(currentCard, user) {
+    if (!currentCard) return null;
 
-    let puntaje = user.puntajes.find(p => p.idTarjeta === $scope.currentTarjeta.id);
+    let puntaje = user.puntajes.find(p => p.idTarjeta === currentCard.id);
 
-    return puntaje || { numero: 0 };
+    return puntaje;
 }
 
 function getFormattedDate(format) {

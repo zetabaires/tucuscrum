@@ -77,3 +77,10 @@ body {
 .numbers-list .card-body {
     border: dotted 2px #f0f0f0;
 }
+
+.disabled {
+    pointer-events: none !important;
+    cursor: default !important;
+    opacity: .65;
+    color: #b0b0b0;
+}
