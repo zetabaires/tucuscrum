@@ -14,10 +14,15 @@
 
     <link rel="stylesheet" type="text/css" href="assets/css/custom.css" />
 
+    <script>
+        windowActive = true;
+    </script>
+
     <script src="assets/js/angular.min.js"></script>
     <script src="assets/js/tools.js"></script>
     <script src="assets/js/constants.js"></script>
 
+    <script src="assets/js/entities.js"></script>
     <script src="assets/js/functions.js"></script>
     <script src="assets/js/app.module.js"></script>
 </head>
@@ -127,18 +132,18 @@
                                 <span id="visits" class="sparkline"><canvas width="79" height="35" style="display: inline-block; width: 79px; height: 35px; vertical-align: top;"></canvas></span>
                             </li>
                             <!--<li>
-                                            <div class="value">
-                                                <span>My balance</span>
-                                                <h4>$<strong id="currentBalance">32012</strong></h4>
-                                            </div>
-                                            <span id="balances" class="sparkline">
-                                                <canvas width="69" height="35" style="        display: inline-block;
-                        width: 69px;
-                        height: 35px;
-                        vertical-align: top;
-                "></canvas>
-                                            </span>
-                                        </li>-->
+                                                        <div class="value">
+                                                            <span>My balance</span>
+                                                            <h4>$<strong id="currentBalance">32012</strong></h4>
+                                                        </div>
+                                                        <span id="balances" class="sparkline">
+                                                            <canvas width="69" height="35" style="        display: inline-block;
+                                    width: 69px;
+                                    height: 35px;
+                                    vertical-align: top;
+                            "></canvas>
+                                                        </span>
+                                                    </li>-->
                         </ul>
                     </div>
 
@@ -330,6 +335,14 @@
             setTimeout(() =>
                 $('[data-toggle="tooltip"]').tooltip(), 1 * 1000);
         })
+
+        $(window, document).focus(function () {
+            windowActive = true;
+        });
+
+        $(window, document).blur(function () {
+            windowActive = false;
+        });
 
     </script>
 </body>

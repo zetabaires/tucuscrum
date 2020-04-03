@@ -17,5 +17,7 @@ const boardId = '5dd54a2725bf3b8e854e64bb';
 
 const enableTimer = true;
 
-const timerDelay = 1;
+const timerDelay = 4;
 const avarageQuantityPercentaje = 40;
+
+const lockMessage = 'try to call lock resource';

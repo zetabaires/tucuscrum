@@ -82,6 +82,12 @@ function toPromise(func) {
     });
 }
 
+function toPromiseErrorResult(message) {
+    return new Promise(function (resolve, reject) {
+        return reject(message);
+    });
+}
+
 function toPromiseResult(result) {
     return toPromise(() => result);
 }
