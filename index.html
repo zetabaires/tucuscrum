@@ -66,11 +66,16 @@
 
     <div class="main-container grayed">
 
-        <section class="ng-hide" id="loginForm" ng-class="{ 'disabled loding': loadingUser }" name="login" ng-hide="currentUser()">
+        <section class="ng-hide" id="loginForm" ng-class="{ 'disabled loading': loadingUser }" name="login" ng-hide="currentUser()">
 
             <div class="login-wrapper fadeInUp">
                 <div class="login-widget">
                     <div class="login-panel">
+                        
+                        <span class="spinner fadeInDown animation-delay1" ng-show="loadingUser">
+                            <i class="fa fa-yin-yang fa-spin"></i>
+                        </span>
+
                         <div class="login-header">
                             <h1 class="fadeInUp animation-delay8">
                                 <a href="#">Tucu's <b>Scrum</b></a>
@@ -90,7 +95,7 @@
         <div class="container-fluid">
             <section class="ng-hide" name="authenticated" ng-show="!!currentUser()">
 
-                <section class="ng-hide" name="withoutproject" ng-class="{ 'disabled loding': loadingProyecto }" ng-show="!currentProyecto()">
+                <section class="ng-hide" name="withoutproject" ng-class="{ 'disabled loading': loadingProyecto }" ng-show="!currentProyecto()">
 
                     <div class="login-wrapper">
                         <div class="login-widget">
@@ -100,6 +105,9 @@
                                 </div>
                             </div>
                             <div class="login-panel" ng-show="isAdmin()">
+                                <span class="spinner fadeInDown animation-delay1" ng-show="loadingProyecto">
+                                    <i class="fa fa-yin-yang fa-spin"></i>
+                                </span>
                                 <div class="login-header">
                                     <h1 class="fadeInUp animation-delay8">
                                         <a href="#">Crear proyecto</a>
@@ -117,7 +125,7 @@
 
                 </section>
 
-                <section class="ng-hide" name="withproject" ng-class="{ 'disabled loding': loadingUser }" ng-show="currentProyecto()">
+                <section class="ng-hide" name="withproject" ng-show="currentProyecto()">
 
                     <div class="main-header clearfix">
                         <div class="page-title">
@@ -157,7 +165,10 @@
                                     No hay ninguna tarjeta cargada aun
                                 </div>
 
-                                <div ng-show="!!currentTarjeta()" ng-class="{ 'disabled loding': loadingTarjeta }">
+                                <div ng-show="!!currentTarjeta()" ng-class="{ 'disabled loading': loadingTarjeta }">
+                                    <span class="spinner fadeInDown animation-delay1" ng-show="loadingTarjeta">
+                                        <i class="fa fa-yin-yang fa-spin"></i>
+                                    </span>
 
                                     <h3 class="mb-3">{{ currentTarjeta().nombre }}</h3>
                                     <hr />
