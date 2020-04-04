@@ -119,7 +119,14 @@ function getCurrentUserSessionId() {
 function setCurrentUser(userId, forced) {
     if (!forced && !userId) throw Error("El usuerId es null");
 
+    if (forced && !userId)
+        return sessionStorage.removeItem(currentUserSessionId);
+
     return sessionStorage.setItem('currentUserSessionId', userId);
+}
+
+function errorResult(msj) {
+    return 'error: ' + msj;
 }
 
 function guid() {

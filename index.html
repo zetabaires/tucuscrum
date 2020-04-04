@@ -15,8 +15,10 @@
     <link rel="stylesheet" type="text/css" href="assets/css/custom.css" />
 
     <script>
-        windowActive = true;
+        window.isActive = true;
     </script>
+
+    <script src="assets/js/console.extenssions.js"></script>
 
     <script src="assets/js/angular.min.js"></script>
     <script src="assets/js/tools.js"></script>
@@ -324,26 +326,30 @@
                 weight: '96px'
             });
         }
-        $('#balances').sparkline([220, 160, 189, 156, 201, 220, 104, 242, 221, 111, 164, 242, 183, 165], {
-            type: 'bar',
-            barColor: '#65CEA7',
-            height: '35px',
-            weight: '96px'
-        });
+
+        //$('#balances').sparkline([220, 160, 189, 156, 201, 220, 104, 242, 221, 111, 164, 242, 183, 165], {
+        //    type: 'bar',
+        //    barColor: '#65CEA7',
+        //    height: '35px',
+        //    weight: '96px'
+        //});
 
         $(function () {
             setTimeout(() =>
                 $('[data-toggle="tooltip"]').tooltip(), 1 * 1000);
         })
 
-        $(window, document).focus(function () {
-            windowActive = true;
-        });
+        $(window)
+            .focus(function () {
+                window.isActive = true;
+            }).blur(function () {
+                window.isActive = false;
+            });
 
-        $(window, document).blur(function () {
-            windowActive = false;
-        });
-
+        setInterval(() => {
+            if (console.isOpen && !document.hidden && !window.isActive)
+                console.log('%c La pantalla perdió el foco. Toca CICK dentro del documento para que se actualice la info kapo ;) ', 'background:red; color: white; padding: 2px');
+        }, 30 * 1000);
     </script>
 </body>
 </html>
