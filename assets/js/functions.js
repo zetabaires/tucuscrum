@@ -126,10 +126,12 @@ function Program($http, $notification) {
             };
 
             $this.allUsers.removeHandler = (item) => {
-                if (!isCurrentUser(item))
-                    $this.notify.message('Se desconecto el usuario ' + item.nombre);
-                else
+                if (isCurrentUser(item)) {
                     $this.notify.error('Ya no estas conectado');
+                    $this.currentProject = null;
+                }
+                else
+                    $this.notify.message('Se desconecto el usuario ' + item.nombre);
             };
 
             let users = data.map(m => __.merge(new User(), m));
