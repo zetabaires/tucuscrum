@@ -38,5 +38,5 @@ function Card(name) {
     this.nombre = name;
     this.activo = true;
     this.puntaciones = [];
-    this.showingResults;
+    this.showingResults = false;
 }

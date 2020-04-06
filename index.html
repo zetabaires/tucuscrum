@@ -196,8 +196,8 @@
                                 <div class="grey-container">
 
                                     <h3>
-                                        Usuarios activos
                                         <span class="badge badge-info float-right">votes {{ getVotedCount() }} / {{activeUsers.length}}</span>
+                                        Usuarios activos
                                     </h3>
                                     <hr class="border-dark" />
                                     <div class="row">
@@ -205,19 +205,19 @@
 
                                             <div class="row mb-2 visible-hover">
 
-                                                <div class="col-8">
+                                                <div class="col-9">
                                                     <i class="fa fa-user mr-1"></i>
                                                     {{ user.nombre }}
-                                                    <button class="reset-b visible-hover-item ml-2 bounceIn" ng-show="isAdmin()" data-toggle="tooltip" title="Quitar usuario" ng-click="deleteUser(user)">
-                                                        <i class="far fa-times-circle text-danger mr-1"></i>
-                                                    </button>
                                                     <i class="fa fa-exclamation-triangle ml-1"
                                                        title="Es un extremo {{ checkMaxMin(user).max ? 'alto' : 'bajo' }}"
                                                        data-toggle="tooltip"
                                                        ng-class="{ 'text-danger': checkMaxMin(user).max, 'text-warning': checkMaxMin(user).min }"
                                                        ng-show="checkResult(user) && checkMaxMin(user).any"></i>
+                                                    <button class="reset-b visible-hover-item ml-2 bounceIn" ng-show="isAdmin()" data-toggle="tooltip" title="Quitar usuario" ng-click="deleteUser(user)">
+                                                        <i class="far fa-times-circle text-danger mr-1"></i>
+                                                    </button>
                                                 </div>
-                                                <div class="col-4 text-right">
+                                                <div class="col-3 text-right">
                                                     <i class="far fa-check-circle text-success" ng-hide="showingResults() || user.getScore(currentTarjeta()) == 0"></i>
                                                     <span class="custom-badge bg-info float-right" ng-show="checkResult(user)">{{ user.getScore(currentTarjeta()) }}</span>
                                                 </div>

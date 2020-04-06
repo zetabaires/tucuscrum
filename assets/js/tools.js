@@ -41,6 +41,7 @@ Array.prototype.set = function (data, identify) {
     $this = this;
 
     let _temp = [];
+    let firstTime = !$this.any();
 
     data.forEach((m, i) => {
         _temp.push(m);
@@ -48,21 +49,45 @@ Array.prototype.set = function (data, identify) {
         // item
         let current = $this.find(x => identify(x, m));
 
-        if (!current)
+        if (!current) {
+            if (!firstTime && $this.insertHandler)
+                $this.insertHandler(m);
+
             current = $this.push(m);
+
+            return;
+        }
 
         // props
         for (let p in m) {
-            if (current[p] !== m[p]) {
-                if ($this.changeHandler)
-                    $this.changeHandler(current, p);
+            if (typeof current[p] === 'function')
+                continue;
 
-                current[p] = m[p];
+            let condition = current[p] !== m[p];
+
+            if ($this.customValidationHandler)
+                condition = $this.customValidationHandler(condition, current, m, p);
+
+            if (condition) {
+                if ($this.changeHandler)
+                    $this.changeHandler(current, m, p);
+
+                if (Array.isArray(current[p]))
+                    Object.assign(current[p], m[p]);
+                else {
+                    current[p] = m[p];
+                }
             }
         }
     });
 
-    $this.remove(m => !_temp.find(x => identify(x, m)));
+    let itemsToRemove = $this.filter(m => !_temp.find(x => identify(x, m)));
+
+    if ($this.removeHandler)
+        itemsToRemove.forEach($this.removeHandler);
+
+    $this.remove(m =>
+        itemsToRemove.find(x => identify(x, m)));
 
     return $this;
 };
@@ -157,3 +182,13 @@ function getFormattedDate(format) {
 function checkOverPercentaje(count, total, percentaje) {
     return Math.floor(count * 100 / total) >= percentaje;
 }
+
+function withResult(func, result) {
+    func();
+
+    return result;
+}
+
+let __ = {
+    merge: Object.assign
+};

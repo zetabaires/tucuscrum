@@ -89,7 +89,7 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
 
         initSparkline('visits', '#FC8675', data);
 
-        console.log('actualiza al pedo');
+        //console.log('actualiza al pedo');
     }).then(() => {
         $program.getBoard(boardId)
             .then(data => {

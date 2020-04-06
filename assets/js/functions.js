@@ -99,14 +99,44 @@ function Program($http, $notification) {
             if (!data || !data.any())
                 return false;
 
-            $this.allUsers.changeHandler = (item, prop) => {
-                if (prop === 'activo' && item.activo)
-                    $this.notify.ok('Se conecto el usuario ' + item.nombre);
+            let currentCard = $this.getCurrentCard();
+
+            $this.allUsers.customValidationHandler = (changed, current, item, prop) => {
+
+                if (prop === 'puntajes') {
+                    changed &=
+                        current.puntajes.length !== item.puntajes.length
+                        || current.getScore(currentCard) !== item.getScore(currentCard);
+                }
+
+                return changed;
             };
 
-            $this.allUsers = data.map(m => Object.assign(new User(), m));
+            $this.allUsers.insertHandler = (item) => {
+                if (!isCurrentUser(item))
+                    $this.notify.message('Se conecto el usuario ' + item.nombre);
+            };
 
-            //$this.allUsers.set(data, (p1, p2) => p1.idCard === p2.idCard);
+            $this.allUsers.changeHandler = (current, item, prop) => {
+
+                if (prop === 'puntajes' && !isCurrentUser(item))
+                    $this.notify.message('El usuario ' + item.nombre + (item.getScore(currentCard) !== 0
+                        ? ' voto!'
+                        : ' quito su voto'));
+            };
+
+            $this.allUsers.removeHandler = (item) => {
+                if (!isCurrentUser(item))
+                    $this.notify.message('Se desconecto el usuario ' + item.nombre);
+                else
+                    $this.notify.error('Ya no estas conectado');
+            };
+
+            let users = data.map(m => __.merge(new User(), m));
+
+            $this.allUsers.set(
+                users,
+                (p1, p2) => p1.idCard === p2.idCard);
 
             return true;
         });
@@ -121,8 +151,22 @@ function Program($http, $notification) {
             if (!data || !data.any())
                 return false;
 
-            if ($this.allCards.count() !== data.count())
-                $this.allCards = data;
+            let cards = data.map(m => __.merge(new Card(), m));
+
+            //if ($this.allCards.count() !== data.count())
+            //$this.allCards = $this.allCards = data;
+            $this.allCards.changeHandler = (current, item, prop) => {
+
+                if (prop === 'showingResults')
+                    if (item.showingResults)
+                        $this.notify.message('La tarjeta se está analizando y no se votar');
+                    else
+                        $this.notify.ok('La tarjeta se puede votar nuevamente');
+            };
+
+            $this.allCards.set(
+                data,
+                (p1, p2) => p1.id === p2.id);
 
             return true;
         });
@@ -140,7 +184,7 @@ function Program($http, $notification) {
             if (!data)
                 return false;
 
-            $this.currentProject = Object.assign(new Project(), data);
+            $this.currentProject = __.merge(new Project(), data);
 
             return true;
         });
@@ -205,8 +249,8 @@ function Program($http, $notification) {
 
     async function createUser(nombre) {
         return post(activeUsersListId, nombre)
-            .then(data => put(data.id, Object.assign(new User(nombre), { idCard: data.id })))
-            .then(data => $this.allUsers.add(Object.assign(new User(), data)));
+            .then(data => put(data.id, __.merge(new User(nombre), { idCard: data.id })))
+            .then(data => $this.allUsers.add(__.merge(new User(), data)));
     }
 
     async function removeUser(user) {
@@ -241,10 +285,19 @@ function Program($http, $notification) {
                 let instance = data.find(m => m.id === card.id);
 
                 if (instance)
-                    Object.assign(instance, card);
+                    __.merge(instance, card);
 
                 return put(scoreId, data);
             });
+    }
+
+    function isCurrentUser(user) {
+        let currentUser = getCurrentUser();
+
+        if (!user || !currentUser)
+            return false;
+
+        return user.idCard === getCurrentUser().idCard;
     }
 
     function post(listId, name, submissive) {
@@ -297,7 +350,7 @@ function Program($http, $notification) {
 
     function getUsers(submissive) {
         return getList(activeUsersListId, submissive)
-            .then(d => d.map(p => Object.assign(new User(), JSON.parse(p.desc || '{}'))));
+            .then(d => d.map(p => __.merge(new User(), JSON.parse(p.desc || '{}'))));
     }
 }
 
