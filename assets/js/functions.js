@@ -161,7 +161,7 @@ function Program($http, $notification) {
 
                 if (prop === 'showingResults')
                     if (item.showingResults)
-                        $this.notify.message('La tarjeta se está analizando y no se votar');
+                        $this.notify.message('La tarjeta se esta analizando y no se votar');
                     else
                         $this.notify.ok('La tarjeta se puede votar nuevamente');
             };

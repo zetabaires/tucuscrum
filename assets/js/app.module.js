@@ -105,11 +105,11 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
     //$scope.checkDataTimer = checkDataTimer;
 
     $scope.deleteUser = (user) => {
-        if (!confirm('Estás seguro que queres sacar a ' + user.nombre))
+        if (!confirm('Estas seguro que queres sacar a ' + user.nombre))
             return;
 
         $program.removeUser(user)
-            .then(() => $program.notify.ok('Se eliminó al usuario ' + user.nombre));
+            .then(() => $program.notify.ok('Se elimino al usuario ' + user.nombre));
     };
 
     $scope.showingResults = () => $scope.currentTarjeta() && $scope.currentTarjeta().showingResults;
@@ -139,7 +139,7 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
     };
 
     $scope.cerrarProyecto = () => {
-        if (!confirm('Estás seguro que queres cerrar el proyecto?')) return;
+        if (!confirm('Estas seguro que queres cerrar el proyecto?')) return;
 
         $scope.loadingProyecto = true;
         cerrarProyecto($scope, $program)
