@@ -138,16 +138,16 @@ function NotificationProvider($notification) {
 }
 
 function getCurrentUserSessionId() {
-    return sessionStorage.getItem('currentUserSessionId');
+    return localStorage.getItem('currentUserSessionId');
 }
 
 function setCurrentUser(userId, forced) {
     if (!forced && !userId) throw Error("El usuerId es null");
 
     if (forced && !userId)
-        return sessionStorage.removeItem('currentUserSessionId');
+        return localStorage.removeItem('currentUserSessionId');
 
-    return sessionStorage.setItem('currentUserSessionId', userId);
+    return localStorage.setItem('currentUserSessionId', userId);
 }
 
 function errorResult(msj) {
