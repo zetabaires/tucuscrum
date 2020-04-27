@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Votes</title>
+    <link rel="stylesheet" type="text/css" href="assets/fontawesome/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="assets/bootstrap/css/bootstrap.min.css" />
+
+    <link rel="stylesheet" type="text/css" href="assets/css/endless.min.css" />
+    <link rel="stylesheet" type="text/css" href="assets/css/endless-skin.css" />
+
+    <link rel="stylesheet" type="text/css" href="assets/css/notifications.css" />
+
+    <script src="assets/js/console.extenssions.js"></script>
+
+    <script src="assets/js/angular.min.js"></script>
+    <script src="assets/js/tools.js"></script>
+    <script src="assets/js/constants.js"></script>
+
+    <script src="assets/js/entities.js"></script>
+    <script src="assets/js/functions.js"></script>
+
+    <script>
+
+        let app = angular.module('app', ['ui-notification'])
+            .config(function (NotificationProvider) {
+                NotificationProvider.setOptions({
+                    delay: 10000,
+                    startTop: 20,
+                    startRight: 10,
+                    verticalSpacing: 20,
+                    horizontalSpacing: 20,
+                    positionX: 'right',
+                    positionY: 'bottom'
+                });
+            });
+
+        app.controller('appcontroller', function ($scope, $http, Notification) {
+            let $program = new Program($http, Notification);
+
+            $scope.nombreUsuarios;
+            $scope.nombreLista;
+            $scope.nombreTarjetas;
+            $scope.nombreLabels;
+
+            $scope.users = [];
+            $scope.optionsList = [];
+            $scope.checkLists = [];
+            $scope.cardsPending = [];
+
+            let boardLists = [];
+            let boardCards = [];
+            let boardChecklists = [];
+
+            $program.getBoard(boardId).then(data => {
+                boardLists = data;
+
+                $scope.optionsList = data.map(m => ({ name: m.name }));
+            })
+
+            $http.get(getUrl(`board/${boardId}/cards?fields=name,idList,labels`)).then(data =>
+                boardCards = data.data)
+
+            $http.get(getUrl(`boards/${boardId}/checklists`)).then(data => {
+
+                boardChecklists = Enumerable.from(data.data)
+                    .where(m => m.state != 'complete' && m.checkItems.any(x => x.name.contains('@')))
+                    .selectMany(m => {
+                        return m.checkItems.map(p => ({
+                            idList: boardCards.filter(x => x.id == m.idCard).map(x => x.idList).first(),
+                            idCard: m.idCard,
+                            name: p.name,
+                            users: p.name.split(' ').filter(p => p.contains('@'))
+                        }));
+                    })
+                    .selectMany(m => m.users.map(p => ({ idList: m.idList, idCard: m.idCard, name: m.name, user: trimEnd(p, '.') })))
+                    .groupBy(m => m.user)
+                    .select(m => ({
+                        user: m.key(),
+                        pendings: Enumerable.from(m.getSource())
+                            .groupBy(p => p.idCard)
+                            .select(p => ({ idCard: p.key(), pendings: p.getSource() }))
+                            .toArray()
+                    }))
+                    .toArray();
+
+                console.log(boardChecklists);
+
+                $('[data-toggle=collapse]').collapse();
+
+                //boardLists.forEach(m => {
+                //    let checklist = boardChecklists.filter(p => p.idList == m.id);
+
+                //    if (!checklist.any()) return;
+
+                //    let cads = boardCards.filter(x => checklist.any(p => p.idCard == x.id));
+
+                //    cads.forEach(x => {
+                //        let cardCheckList = checklist.filter(p => p.idCard == x.id);
+
+                //        x.pendings = cardCheckList;
+                //    });
+
+                //    m.cardsPending = cads;
+                //});
+
+                //console.log(boardLists);
+            })
+
+            $scope.getCard = (id) => {
+                return boardCards.find(m => m.id == id);
+            };
+
+            $scope.groupBycard = (pendings) => {
+                return Enumerable.from(pendings)
+                    .groupBy(m => m.idCard)
+                    .select(m => ({ idCard: m.key(), pendings: m.getSource() }))
+                    .toArray();
+            };
+
+            $scope.getList = (id) => {
+                return boardLists.find(m => m.id == id);
+            };
+
+            $scope.selectOptionList = (opt) => {
+                $scope.nombreLista = opt;
+            };
+
+            $scope.checkOwner = function (user, pending) {
+                return pending && user && pending.user == user;
+            }
+
+            $scope.buscar = function () {
+
+                let listas = boardChecklists || [];
+
+                if ($scope.nombreUsuarios)
+                    listas = listas.filter(m => {
+                        return $scope.nombreUsuarios.split(',').any(p => m.user.contains(p.trim()));
+                    });
+
+                if ($scope.nombreLista)
+                    listas = listas.filter(l => l.pendings.any(m => {
+                        let list = $scope.getList($scope.getCard(m.idCard).idList);
+
+                        return list && $scope.nombreLista.split(',').any(p => list.name.contains(p.trim()));
+                    }));
+
+                if ($scope.nombreTarjetas)
+                    listas = listas.filter(l => l.pendings.any(m => {
+                        let card = $scope.getCard(m.idCard);
+
+                        return card && $scope.nombreTarjetas.split(',').any(p => card.name.contains(p.trim()));
+                    }));
+
+                if ($scope.nombreLabels)
+                    listas = listas.filter(l => l.pendings.any(m => {
+                        let card = $scope.getCard(m.idCard);
+
+                        if ($scope.nombreLabels.contains('&'))
+                            return card && $scope.nombreLabels.split('&').every(p => card.labels.any(l => l.name.contains(p.trim())));
+                        else
+                            return card && $scope.nombreLabels.split(',').any(p => card.labels.any(l => l.name.contains(p.trim())));
+                    }));
+
+                //let find = boardLists.find(m =>
+                //    m.name.contains($scope.nombreLista) ||
+                //    (m.cardsPending &&
+                //        (m.cardsPending.any(p => $scope.nombreTarjetas.split(',').any(x => p.name.contains(x)))) ||
+                //        (m.cardsPending.any(p => $scope.nombreLabels.split(',').any(x => p.labels.contains(x))))
+                //    )
+                //);
+
+                return listas;
+            }
+
+            $scope.optionsVisible = (list, name) => {
+                if (list.map(m => m.name).includes(name)) return list;
+
+                return list.filter(m =>
+                    m.name.contains(name) || (m.labels && m.labels.any(p => p.name.contains(name))));
+            };
+
+            $scope.colors = {
+                "blue": "info",
+                "green": "success",
+                "yellow": "warning",
+                "orange": "warning",
+                "red": "danger",
+                "lime": "danger",
+                "black": "secondary",
+                "purple": "primary"
+            };
+        });
+
+    </script>
+    <style>
+        /*.auto-complete.dropdown-menu {
+            min-height: inherit !important;
+            max-height: 200px !important;
+        }*/
+
+        body {
+            font-size: 14px;
+        }
+
+        .bs-callout-info {
+            border-left-color: #1b809e;
+        }
+
+        .bs-callout {
+            padding: 10px 15px;
+            border: 1px solid #eee;
+            border-left-width: 5px;
+            border-radius: 3px;
+        }
+
+        .mouse-pointer {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body ng-app="app" ng-controller="appcontroller">
+
+    <div class="main-container grayed">
+
+        <div class="container-fluid">
+
+            <div class="p-3">
+
+                <h1>Pendientes</h1>
+
+                <div class="row">
+
+                    <div class="col-3">
+                        <label>Nombres</label>
+                        <input class="form-control" placeholder="Separados por coma (,)" ng-model="nombreUsuarios" />
+                    </div>
+                    <div class="col-3">
+                        <label>Listas</label>
+                        <input class="form-control" placeholder="Separados por coma (,)" ng-model="nombreLista" />
+                    </div>
+                    <div class="col-3">
+                        <label>Tarjetas</label>
+                        <input class="form-control" placeholder="Separados por coma (,)" ng-model="nombreTarjetas" />
+                    </div>
+                    <div class="col-3">
+                        <label>Labels</label>
+                        <input class="form-control" placeholder="Ej. refi, core <=> refi & core" ng-model="nombreLabels" />
+                    </div>
+
+                </div>
+
+                <hr />
+
+                <div class="row">
+
+                    <div class="col-6" ng-repeat="itemUser in buscar()">
+
+                        <div class="card card-default">
+
+                            <div class="card-header px-3 py-2 mouse-pointer" data-toggle="collapse" data-target="#{{itemUser.user.replace('@', '')}}">
+                                <button class="btn btn-sm btn-default p-0 float-right">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                                <h5 class="m-0">
+                                    {{itemUser.user}} 
+                                    ({{itemUser.pendings.count()}})
+                                </h5>
+
+                            </div>
+                            <div class="collapse" id="{{itemUser.user.replace('@', '')}}">
+                                <div class="card-body py-3 px-2">
+
+                                    <div class="row">
+
+                                        <div class="col-12" ng-repeat="item in itemUser.pendings">
+                                            <div class="bs-callout bs-callout-info mb-2">
+                                                <div>
+                                                    <span class="mr-1 badge badge-{{colors[label.color] || 'default'}}" ng-repeat="label in getCard(item.idCard).labels">{{label.name}}</span>
+                                                </div>
+                                                {{getCard(item.idCard).name}}
+                                                -
+                                                <span class="badge barge-warning">
+                                                    ({{ getList(getCard(item.idCard).idList).name }})
+                                                </span>
+                                                <ul class="pl-3 mt-2">
+                                                    <li class="mb-2 {{checkOwner(itemUser.user, pending) ? 'alert-info px-2 py-1' : ''}}" ng-repeat="pending in item.pendings">
+                                                        -
+                                                        {{pending.name}}
+                                                    </li>
+                                                </ul>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/jquery-3.4.1.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/jquery.sparkline.min.js"></script>
+    <script src="assets/js/angular-ui-notification.js"></script>
+
+    <script src="assets/js/linq.min.js"></script>
+</body>
+</html>

@@ -101,6 +101,12 @@ Array.prototype.first = function (exp) {
     return r[0];
 };
 
+function trimEnd(str, char) {
+    if (str.endsWith(char))
+        return str.substr(0, str.length - 1);
+    return str;
+}
+
 function toPromise(func) {
     return new Promise(function (resolve, reject) {
         return resolve(func());
