@@ -180,6 +180,10 @@
                     m.name.contains(name) || (m.labels && m.labels.any(p => p.name.contains(name))));
             };
 
+            $scope.getTotalPendingsCount = function (pendings) {
+                return Enumerable.from(pendings).selectMany(m => m.pendings.count()).sum();
+            }
+
             $scope.colors = {
                 "blue": "info",
                 "green": "success",
@@ -290,7 +294,17 @@
                                 </button>
                                 <h5 class="m-0">
                                     {{itemUser.user}}
-                                    ({{itemUser.pendings.count()}})
+                                    <span class="float-right mr-2" style="font-size: 14px">
+                                        <span class="badge" style="font-size: 14px">
+                                            ({{getTotalPendingsCount(itemUser.pendings)}})
+                                            pendientes
+                                        </span>
+                                        de
+                                        <span class="badge" style="font-size: 14px">
+                                            {{itemUser.pendings.count()}}
+                                            tarjetas
+                                        </span>
+                                    </span>
                                 </h5>
                             </div>
                             <!--Datos tarjetas-->
