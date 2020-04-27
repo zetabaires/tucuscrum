@@ -190,6 +190,32 @@
                 "black": "secondary",
                 "purple": "primary"
             };
+
+            $scope.getFiltered = function (filter, list) {
+                if (!filter)
+                    return list;
+
+                var result = list;
+
+                let parts = filter.split(',');
+
+                let exclusive = parts.filter(m => m.contains('&'));
+                let inclusive = parts.filter(m => !exclusive.includes(m));
+
+                if (exclusive.any())
+                    result = result.filter(m =>
+                        exclusive.first().split('&').every(x =>
+                            $scope.getCard(m.idCard).labels.any(p => p.name.contains(x.trim()))));
+
+                result = result.filter(m =>
+                    !inclusive.any() || inclusive.any(x =>
+                        $scope.getCard(m.idCard).name.contains(x.trim()) ||
+                        $scope.getList($scope.getCard(m.idCard).idList).name.contains(x.trim()) ||
+                        m.pendings.any(p => p.name.contains(x.trim()))));
+
+
+                return result;
+            }
         });
 
     </script>
@@ -222,13 +248,12 @@
 <body ng-app="app" ng-controller="appcontroller">
 
     <div class="main-container grayed">
-
         <div class="container-fluid">
-
             <div class="p-3">
 
                 <h1>Pendientes</h1>
 
+                <!--Buscador-->
                 <div class="row">
 
                     <div class="col-3">
@@ -252,48 +277,46 @@
 
                 <hr />
 
+                <!--Usuarios-->
                 <div class="row">
 
                     <div class="col-6" ng-repeat="itemUser in buscar()">
 
                         <div class="card card-default">
-
+                            <!--Datos usuario-->
                             <div class="card-header px-3 py-2 mouse-pointer" data-toggle="collapse" data-target="#{{itemUser.user.replace('@', '')}}">
                                 <button class="btn btn-sm btn-default p-0 float-right">
                                     <i class="fa fa-eye"></i>
                                 </button>
                                 <h5 class="m-0">
-                                    {{itemUser.user}} 
+                                    {{itemUser.user}}
                                     ({{itemUser.pendings.count()}})
                                 </h5>
-
                             </div>
+                            <!--Datos tarjetas-->
                             <div class="collapse" id="{{itemUser.user.replace('@', '')}}">
                                 <div class="card-body py-3 px-2">
-
-                                    <div class="row">
-
-                                        <div class="col-12" ng-repeat="item in itemUser.pendings">
-                                            <div class="bs-callout bs-callout-info mb-2">
-                                                <div>
-                                                    <span class="mr-1 badge badge-{{colors[label.color] || 'default'}}" ng-repeat="label in getCard(item.idCard).labels">{{label.name}}</span>
-                                                </div>
-                                                {{getCard(item.idCard).name}}
-                                                -
-                                                <span class="badge barge-warning">
-                                                    ({{ getList(getCard(item.idCard).idList).name }})
-                                                </span>
-                                                <ul class="pl-3 mt-2">
-                                                    <li class="mb-2 {{checkOwner(itemUser.user, pending) ? 'alert-info px-2 py-1' : ''}}" ng-repeat="pending in item.pendings">
-                                                        -
-                                                        {{pending.name}}
-                                                    </li>
-                                                </ul>
-                                            </div>
-
-                                        </div>
-
+                                    <div class="mb-3">
+                                        <input class="form-control" ng-model="itemUser.filter" placeholder="Separados por comas (,) y & con labels: Ej. validar, data & refi" />
                                     </div>
+
+                                    <div class="bs-callout bs-callout-info mb-2" ng-repeat="item in getFiltered(itemUser.filter, itemUser.pendings)">
+                                        <div>
+                                            <span class="mr-1 badge badge-{{colors[label.color] || 'default'}}" ng-repeat="label in getCard(item.idCard).labels">{{label.name}}</span>
+                                        </div>
+                                        {{getCard(item.idCard).name}}
+                                        -
+                                        <span class="badge barge-warning">
+                                            ({{ getList(getCard(item.idCard).idList).name }})
+                                        </span>
+                                        <ul class="pl-3 mt-2">
+                                            <li class="mb-2 {{checkOwner(itemUser.user, pending) ? 'alert-info px-2 py-1' : ''}}" ng-repeat="pending in item.pendings">
+                                                -
+                                                {{pending.name}}
+                                            </li>
+                                        </ul>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
