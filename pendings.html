@@ -63,16 +63,18 @@
             $http.get(getUrl(`boards/${boardId}/checklists`)).then(data => {
 
                 boardChecklists = Enumerable.from(data.data)
-                    .where(m => m.state != 'complete' && m.checkItems.any(x => x.name.contains('@')))
+                    .where(m => m.checkItems.any(x => x.state != 'complete' && x.name.contains('@')))
                     .selectMany(m => {
                         return m.checkItems.map(p => ({
                             idList: boardCards.filter(x => x.id == m.idCard).map(x => x.idList).first(),
                             idCard: m.idCard,
                             name: p.name,
+                            status: p.state,
                             users: p.name.split(' ').filter(p => p.contains('@'))
                         }));
                     })
-                    .selectMany(m => m.users.map(p => ({ idList: m.idList, idCard: m.idCard, name: m.name, user: trimEnd(p, '.') })))
+                    .where(m => m.status != 'complete')
+                    .selectMany(m => m.users.map(p => ({ idList: m.idList, idCard: m.idCard, name: m.name, status: m.status, user: trimEnd(p, '.') })))
                     .groupBy(m => m.user)
                     .select(m => ({
                         user: m.key(),
