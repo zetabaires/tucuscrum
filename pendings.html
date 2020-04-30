@@ -86,6 +86,11 @@
                 setTimeout(() => {
                     $('[data-toggle=collapse]').collapse();
                     $('[data-toggle=tooltip]').tooltip();
+                    $('.collapse-box').on('click', function (e) {
+                        e.preventDefault();
+
+                        $(this).closest('.pending-box').find('.collapse').collapse('toggle');
+                    })
                 }, 100)
 
 
@@ -363,7 +368,10 @@
                                         </div>
                                     </div>
 
-                                    <div class="bs-callout bs-callout-info mb-2 mouse-pointer" data-toggle="collapse" data-target="#id_{{item.idCard}}_{{itemUser.user.replace('@', '')}}" ng-repeat="item in getFiltered(itemUser.filter, itemUser.pendings)">
+                                    <a class="d-block bs-callout bs-callout-info mb-2 mouse-pointer pending-box" href="https://trello.com/c/{{getCard(item.idCard).id}}" target="_blank" ng-repeat="item in getFiltered(itemUser.filter, itemUser.pendings)">
+                                        <button class="btn collapse-box float-right py-0 px-1">
+                                            <i class="fa fa-compress-alt"></i>
+                                        </button>
                                         <div>
                                             <span class="mr-1 badge badge-{{colors[label.color] || 'default'}}" ng-repeat="label in getCard(item.idCard).labels">{{label.name}}</span>
                                         </div>
@@ -372,7 +380,7 @@
                                         <span class="badge barge-warning">
                                             ({{ getList(getCard(item.idCard).idList).name }})
                                         </span>
-                                        <div class="collapse show pendings" id="id_{{item.idCard}}_{{itemUser.user.replace('@', '')}}">
+                                        <div class="collapse show pendings">
                                             <ul class="pl-3 mt-2">
                                                 <li class="mb-2 {{checkOwner(itemUser.user, pending) ? 'alert-info px-2 py-1' : ''}}" ng-repeat="pending in item.pendings">
                                                     -
@@ -380,7 +388,7 @@
                                                 </li>
                                             </ul>
                                         </div>
-                                    </div>
+                                    </a>
 
                                 </div>
                             </div>
