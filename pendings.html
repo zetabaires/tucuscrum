@@ -78,6 +78,7 @@
                             }))
                             .toArray()
                     }))
+                    .orderByDescending(m => $scope.getTotalPendingsCount(m.pendings))
                     .toArray();
 
                 setTimeout(() => {
