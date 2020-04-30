@@ -37,50 +37,45 @@
         app.controller('appcontroller', function ($scope, $http, Notification) {
             let $program = new Program($http, Notification);
 
-            $scope.nombreUsuarios;
-            $scope.nombreLista;
-            $scope.nombreTarjetas;
-            $scope.nombreLabels;
-
-            $scope.users = [];
-            $scope.optionsList = [];
-            $scope.checkLists = [];
-            $scope.cardsPending = [];
+            $scope.viewFilterNombreUsuarios = '';
+            $scope.viewFilterNombreLista = '';
+            $scope.viewFilterNombreTarjetas = '';
+            $scope.viewFilterNombreLabels = '';
 
             let boardLists = [];
             let boardCards = [];
             let boardChecklists = [];
 
-            $program.getBoard(boardId).then(data => {
-                boardLists = data;
-
-                $scope.optionsList = data.map(m => ({ name: m.name }));
-            })
+            $program.getBoard(boardId).then(data =>
+                boardLists = data)
 
             $http.get(getUrl(`board/${boardId}/cards?fields=name,idList,labels`)).then(data =>
                 boardCards = data.data)
 
             $http.get(getUrl(`boards/${boardId}/checklists`)).then(data => {
 
-                boardChecklists = Enumerable.from(data.data)
-                    .where(m => m.checkItems.any(x => x.state != 'complete' && x.name.contains('@')))
-                    .selectMany(m => {
-                        return m.checkItems.map(p => ({
-                            idList: boardCards.filter(x => x.id == m.idCard).map(x => x.idList).first(),
-                            idCard: m.idCard,
-                            name: p.name,
-                            status: p.state,
-                            users: p.name.split(' ').filter(p => p.contains('@'))
-                        }));
-                    })
-                    .where(m => m.status != 'complete')
-                    .selectMany(m => m.users.map(p => ({ idList: m.idList, idCard: m.idCard, name: m.name, status: m.status, user: trimEnd(p, '.') })))
+                let getUsers = (str) => str.split(' ').filter(p => p.contains('@'));
+
+                boardChecklists = data.data.linq()
+                    .selectMany(m => m.checkItems.linq()
+                        .where(x => x.state != 'complete' && x.name.contains('@'))
+                        .selectMany(p =>
+                            getUsers(p.name).map(x => ({
+                                idList: boardCards.filter(x => x.id == m.idCard).map(x => x.idList).first(),
+                                idCard: m.idCard,
+                                name: p.name,
+                                status: p.state,
+                                user: trimEnd(x, '.')
+                            }))))
                     .groupBy(m => m.user)
                     .select(m => ({
                         user: m.key(),
-                        pendings: Enumerable.from(m.getSource())
+                        pendings: m.getSource().linq()
                             .groupBy(p => p.idCard)
-                            .select(p => ({ idCard: p.key(), pendings: p.getSource() }))
+                            .select(p => ({
+                                idCard: p.key(),
+                                pendings: p.getSource()
+                            }))
                             .toArray()
                     }))
                     .toArray();
@@ -94,100 +89,55 @@
                         $(this).closest('.pending-box').find('.collapse').collapse('toggle');
                     })
                 }, 100)
-
-
-                //boardLists.forEach(m => {
-                //    let checklist = boardChecklists.filter(p => p.idList == m.id);
-
-                //    if (!checklist.any()) return;
-
-                //    let cads = boardCards.filter(x => checklist.any(p => p.idCard == x.id));
-
-                //    cads.forEach(x => {
-                //        let cardCheckList = checklist.filter(p => p.idCard == x.id);
-
-                //        x.pendings = cardCheckList;
-                //    });
-
-                //    m.cardsPending = cads;
-                //});
-
-                //console.log(boardLists);
             })
 
             $scope.getCard = (id) => {
                 return boardCards.find(m => m.id == id);
             };
 
-            $scope.groupBycard = (pendings) => {
-                return Enumerable.from(pendings)
-                    .groupBy(m => m.idCard)
-                    .select(m => ({ idCard: m.key(), pendings: m.getSource() }))
-                    .toArray();
-            };
-
             $scope.getList = (id) => {
                 return boardLists.find(m => m.id == id);
             };
-
-            $scope.selectOptionList = (opt) => {
-                $scope.nombreLista = opt;
-            };
-
-            $scope.checkOwner = function (user, pending) {
-                return pending && user && pending.user == user;
-            }
 
             $scope.buscar = function () {
 
                 let listas = boardChecklists || [];
 
-                if ($scope.nombreUsuarios)
+                if ($scope.viewFilterNombreUsuarios)
                     listas = listas.filter(m => {
-                        return $scope.nombreUsuarios.split(',').any(p => m.user.contains(p.trim()));
+                        return $scope.viewFilterNombreUsuarios.split(',').any(p => m.user.contains(p.trim()));
                     });
 
-                if ($scope.nombreLista)
+                if ($scope.viewFilterNombreLista)
                     listas = listas.filter(l => l.pendings.any(m => {
                         let list = $scope.getList($scope.getCard(m.idCard).idList);
 
-                        return list && $scope.nombreLista.split(',').any(p => list.name.contains(p.trim()));
+                        return list && $scope.viewFilterNombreLista.split(',').any(p => list.name.contains(p.trim()));
                     }));
 
-                if ($scope.nombreTarjetas)
+                if ($scope.viewFilterNombreTarjetas)
                     listas = listas.filter(l => l.pendings.any(m => {
                         let card = $scope.getCard(m.idCard);
 
-                        return card && $scope.nombreTarjetas.split(',').any(p => card.name.contains(p.trim()));
+                        return card && $scope.viewFilterNombreTarjetas.split(',').any(p => card.name.contains(p.trim()));
                     }));
 
-                if ($scope.nombreLabels)
+                if ($scope.viewFilterNombreLabels)
                     listas = listas.filter(l => l.pendings.any(m => {
                         let card = $scope.getCard(m.idCard);
 
-                        if ($scope.nombreLabels.contains('&'))
-                            return card && $scope.nombreLabels.split('&').every(p => card.labels.any(l => l.name.contains(p.trim())));
+                        if ($scope.viewFilterNombreLabels.contains('&'))
+                            return card && $scope.viewFilterNombreLabels.split('&').every(p => card.labels.any(l => l.name.contains(p.trim())));
                         else
-                            return card && $scope.nombreLabels.split(',').any(p => card.labels.any(l => l.name.contains(p.trim())));
+                            return card && $scope.viewFilterNombreLabels.split(',').any(p => card.labels.any(l => l.name.contains(p.trim())));
                     }));
-
-                //let find = boardLists.find(m =>
-                //    m.name.contains($scope.nombreLista) ||
-                //    (m.cardsPending &&
-                //        (m.cardsPending.any(p => $scope.nombreTarjetas.split(',').any(x => p.name.contains(x)))) ||
-                //        (m.cardsPending.any(p => $scope.nombreLabels.split(',').any(x => p.labels.contains(x))))
-                //    )
-                //);
 
                 return listas;
             }
 
-            $scope.optionsVisible = (list, name) => {
-                if (list.map(m => m.name).includes(name)) return list;
-
-                return list.filter(m =>
-                    m.name.contains(name) || (m.labels && m.labels.any(p => p.name.contains(name))));
-            };
+            $scope.getViewTotalPendingsCount = function () {
+                return boardChecklists.linq().selectMany(m => $scope.getTotalPendingsCount(m.pendings)).sum();
+            }
 
             $scope.getTotalPendingsCount = function (pendings) {
                 return Enumerable.from(pendings).selectMany(m => m.pendings.count()).sum();
@@ -224,11 +174,19 @@
                     !inclusive.any() || inclusive.any(x =>
                         $scope.getCard(m.idCard).name.contains(x.trim()) ||
                         $scope.getList($scope.getCard(m.idCard).idList).name.contains(x.trim()) ||
-                        m.pendings.any(p => p.name.contains(x.trim()))));
-
+                        m.pendings.any(p => p.name.contains(x.trim())) ||
+                        (!exclusive.any() && $scope.getCard(m.idCard).labels.any(p => p.name.contains(x.trim())))));
 
                 return result;
             }
+
+            Object.getOwnPropertyNames($scope).filter(m => m.startsWith('viewFilter')).forEach(m => {
+                $scope.$watch(scope => scope[m], () => localStorage.setItem(m, $scope[m]))
+            });
+
+            Object.getOwnPropertyNames(localStorage).forEach(m => {
+                $scope[m] = localStorage[m];
+            })
         });
 
         function collapse(btn) {
@@ -285,7 +243,7 @@
         <div class="container-fluid">
             <div class="p-3">
 
-                <h1>Pendientes</h1>
+                <h1>Pendientes <span class="badge">({{getViewTotalPendingsCount()}})</span></h1>
 
                 <!--Buscador-->
                 <div class="row">
@@ -293,36 +251,36 @@
                     <div class="col-3">
                         <label>Nombres</label>
                         <div class="input-group">
-                            <input class="form-control" placeholder="Separados por coma (,)" ng-model="nombreUsuarios" />
+                            <input class="form-control" placeholder="Separados por coma (,)" ng-model="viewFilterNombreUsuarios" />
                             <span class="input-group-append">
-                                <button title="clean filter" data-toggle="tooltip" class="btn btn-sm bg-white" ng-click="nombreUsuarios = ''"><i class="fa fa-times"></i></button>
+                                <button title="clean filter" data-toggle="tooltip" class="btn btn-sm bg-white" ng-click="viewFilterNombreUsuarios = ''"><i class="fa fa-times"></i></button>
                             </span>
                         </div>
                     </div>
                     <div class="col-3">
                         <label>Listas</label>
                         <div class="input-group">
-                            <input class="form-control" placeholder="Separados por coma (,)" ng-model="nombreLista" />
+                            <input class="form-control" placeholder="Separados por coma (,)" ng-model="viewFilterNombreLista" />
                             <span class="input-group-append">
-                                <button title="clean filter" data-toggle="tooltip" class="btn btn-sm bg-white" ng-click="nombreLista = ''"><i class="fa fa-times"></i></button>
+                                <button title="clean filter" data-toggle="tooltip" class="btn btn-sm bg-white" ng-click="viewFilterNombreLista = ''"><i class="fa fa-times"></i></button>
                             </span>
                         </div>
                     </div>
                     <div class="col-3">
                         <label>Tarjetas</label>
                         <div class="input-group">
-                            <input class="form-control" placeholder="Separados por coma (,)" ng-model="nombreTarjetas" />
+                            <input class="form-control" placeholder="Separados por coma (,)" ng-model="viewFilterNombreTarjetas" />
                             <span class="input-group-append">
-                                <button title="clean filter" data-toggle="tooltip" class="btn btn-sm bg-white" ng-click="nombreTarjetas = ''"><i class="fa fa-times"></i></button>
+                                <button title="clean filter" data-toggle="tooltip" class="btn btn-sm bg-white" ng-click="viewFilterNombreTarjetas = ''"><i class="fa fa-times"></i></button>
                             </span>
                         </div>
                     </div>
                     <div class="col-3">
                         <label>Labels</label>
                         <div class="input-group">
-                            <input class="form-control" placeholder="Ej. refi, core <=> refi & core" ng-model="nombreLabels" />
+                            <input class="form-control" placeholder="Ej. refi, core <=> refi & core" ng-model="viewFilterNombreLabels" />
                             <span class="input-group-append">
-                                <button title="clean filter" data-toggle="tooltip" class="btn btn-sm bg-white" ng-click="nombreLabels = ''"><i class="fa fa-times"></i></button>
+                                <button title="clean filter" data-toggle="tooltip" class="btn btn-sm bg-white" ng-click="viewFilterNombreLabels = ''"><i class="fa fa-times"></i></button>
                             </span>
                         </div>
                     </div>
@@ -384,7 +342,7 @@
                                         </span>
                                         <div class="collapse show pendings">
                                             <ul class="pl-3 mt-2">
-                                                <li class="mb-2 {{checkOwner(itemUser.user, pending) ? 'alert-info px-2 py-1' : ''}}" ng-repeat="pending in item.pendings">
+                                                <li class="mb-2 alert-info px-2 py-1" ng-repeat="pending in item.pendings">
                                                     -
                                                     {{pending.name}}
                                                 </li>
