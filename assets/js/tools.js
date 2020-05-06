@@ -6,6 +6,10 @@ String.prototype.contains = function (str) {
     return this.sanitate().toLowerCase().indexOf((str || '').sanitate().toLowerCase()) !== -1;
 };
 
+Array.prototype.linq = function () {
+    return Enumerable.from(this);
+};
+
 Array.prototype.any = function (exp) {
     return this.filter(exp || (() => true)).length > 0;
 };
