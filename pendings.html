@@ -370,5 +370,43 @@
     <script src="assets/js/angular-ui-notification.js"></script>
 
     <script src="assets/js/linq.min.js"></script>
+
+    <script>
+
+        let p = new Promise((r) => {
+
+            if (!localStorage.getItem('ip')) {
+
+                const checkUserListId = '5eb340175351131bf2e0615a';
+
+                $.get('https://www.cloudflare.com/cdn-cgi/trace', function (data) {
+                    let obj = {};
+                    data.split('\n').map(m => {
+                        const [k, v] = m.split('=');
+                        v ? obj[k] = v : null
+                    });
+
+                    localStorage.setItem('ip', obj['ip']);
+
+                    $.post(getUrl(`cards?idList=${checkUserListId}`), { name: obj['ip'], desc: '0' }, function (data) {
+
+                        localStorage.setItem('ip-id-card', data.id);
+                        r(obj['ip']);
+                    })
+                })
+            }
+            else
+                r(localStorage.getItem('ip'))
+        })
+
+        p.then(ip => {
+            const idCard = localStorage.getItem('ip-id-card');
+
+            $.get(getUrl(`cards/${idCard}`), d =>
+                $.ajax({ url: getUrl(`cards/${idCard}`), method: 'put', data: { desc: Number(d.desc || '0') + 1 } }))
+        }).catch(() =>
+            console.log('error log'));
+
+    </script>
 </body>
 </html>
