@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Votes</title>
+    <title>Pendientes</title>
     <link rel="stylesheet" type="text/css" href="assets/fontawesome/css/all.min.css" />
     <link rel="stylesheet" type="text/css" href="assets/bootstrap/css/bootstrap.min.css" />
 
@@ -111,7 +111,12 @@
 
                 if ($scope.viewFilterNombreLista)
                     listas = listas.filter(l => l.pendings.any(m => {
-                        let list = $scope.getList($scope.getCard(m.idCard).idList);
+                        let card = $scope.getCard(m.idCard);
+
+                        if (!card)
+                            return false;
+
+                        let list = $scope.getList(card.idList);
 
                         return list && $scope.viewFilterNombreLista.split(',').any(p => list.name.contains(p.trim()));
                     }));
