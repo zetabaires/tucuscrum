@@ -15,6 +15,9 @@ const scoreId = '5e822b4bd8dc2c669b88c9b0';
 
 const boardId = '5dd54a2725bf3b8e854e64bb';
 
+const licenciasCardId = '5e1f18c648719471ad0b546b';
+const ignoreStaticCardsList = [licenciasCardId];
+
 const enableTimer = true;
 
 const timerDelay = 4;
