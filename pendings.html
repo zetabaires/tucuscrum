@@ -79,7 +79,7 @@
                 let getUsers = (str) => str.split(' ').filter(p => p.contains('@'));
 
                 boardChecklists = data.data.linq()
-                    .where(m => !ignoreStaticCardsList.includes(m.idCard))
+                    .where(m => boardCards.find(x => x.id == m.idCard) && !ignoreStaticCardsList.includes(m.idCard))
                     .selectMany(m => m.checkItems.linq()
                         .where(x => x.state != 'complete' && x.name.contains('@'))
                         .selectMany(p =>
