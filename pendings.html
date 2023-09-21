@@ -71,11 +71,14 @@
             $program.getBoard(boardId).then(data =>
                 boardLists = data)
 
-            $http.get(getUrl(`board/${boardId}/cards?fields=name,idList,labels`)).then(data =>
-                boardCards = data.data)
+            $http.get(getUrl(`board/${boardId}/cards?fields=name,idList,labels`)).then(data => {
+                boardCards = data.data
+                console.log('boardCards', boardCards);
+                })
 
             $http.get(getUrl(`boards/${boardId}/checklists`)).then(data => {
 
+                console.log('entroooo')
                 let getUsers = (str) => str.split(' ').filter(p => p.contains('@'));
 
                 boardChecklists = data.data.linq()
@@ -406,39 +409,39 @@
 
     <script>
 
-        let p = new Promise((r) => {
+        // let p = new Promise((r) => {
 
-            if (!localStorage.getItem('ip')) {
+        //     if (!localStorage.getItem('ip')) {
 
-                const checkUserListId = '5eb340175351131bf2e0615a';
+        //         const checkUserListId = '650ca67802c643dd67a3b650';
 
-                $.get('https://www.cloudflare.com/cdn-cgi/trace', function (data) {
-                    let obj = {};
-                    data.split('\n').map(m => {
-                        const [k, v] = m.split('=');
-                        v ? obj[k] = v : null
-                    });
+        //         $.get('https://www.cloudflare.com/cdn-cgi/trace', function (data) {
+        //             let obj = {};
+        //             data.split('\n').map(m => {
+        //                 const [k, v] = m.split('=');
+        //                 v ? obj[k] = v : null
+        //             });
 
-                    localStorage.setItem('ip', obj['ip']);
+        //             localStorage.setItem('ip', obj['ip']);
 
-                    $.post(getUrl(`cards?idList=${checkUserListId}`), { name: obj['ip'], desc: '0' }, function (data) {
+        //             $.post(getUrl(`cards?idList=${checkUserListId}`), { name: obj['ip'], desc: '0' }, function (data) {
 
-                        localStorage.setItem('ip-id-card', data.id);
-                        r(obj['ip']);
-                    })
-                })
-            }
-            else
-                r(localStorage.getItem('ip'))
-        })
+        //                 localStorage.setItem('ip-id-card', data.id);
+        //                 r(obj['ip']);
+        //             })
+        //         })
+        //     }
+        //     else
+        //         r(localStorage.getItem('ip'))
+        // })
 
-        p.then(ip => {
-            const idCard = localStorage.getItem('ip-id-card');
+        // p.then(ip => {
+        //     const idCard = localStorage.getItem('ip-id-card');
 
-            $.get(getUrl(`cards/${idCard}`), d =>
-                $.ajax({ url: getUrl(`cards/${idCard}`), method: 'put', data: { desc: Number(d.desc || '0') + 1 } }))
-        }).catch(() =>
-            console.log('error log'));
+        //     $.get(getUrl(`cards/${idCard}`), d =>
+        //         $.ajax({ url: getUrl(`cards/${idCard}`), method: 'put', data: { desc: Number(d.desc || '0') + 1 } }))
+        // }).catch(() =>
+        //     console.log('error log'));
 
     </script>
 </body>
