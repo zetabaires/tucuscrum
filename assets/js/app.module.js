@@ -114,6 +114,7 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
 
     $scope.showingResults = () => $scope.currentTarjeta() && $scope.currentTarjeta().showingResults;
     $scope.getVotedCount = () => $program.allUsers.count(m => m.hasVoted($scope.currentTarjeta()));
+    $scope.getVotedAvg = () => $scope.showingResults() ? $scope.getPuntajeTarjeta($scope.currentTarjeta()) : '';
     $scope.isAdmin = () => $program.getCurrentUserIsAdmin();
     $scope.oldTarjetas = () => $program.allCards.filter(m => !m.activo) || [];
     $scope.checkCardResult = (number) => $scope.showingResults() && $program.allUsers.any(m => m.getScore($scope.currentTarjeta()) === number);
