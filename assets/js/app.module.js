@@ -75,7 +75,7 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
             });
     }
 
-    $scope.numbers = [1, 2, 3, 5, 8, 13, 21, 34];
+    $scope.numbers = [1, 2, 3, 5, 8, 13, '☹️', '☕'];
 
     // check current user
     //initCheck();
