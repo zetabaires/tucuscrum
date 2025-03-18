@@ -1,0 +1,20 @@
+# Logs
+*.log
+
+# Dependencies
+node_modules
+
+# Trash
+.DS_Store
+.idea
+.vscode
+
+# Coverage generated files
+coverage
+
+# Generated files
+/build/*
+!/build/manifest.json
+/object-storage-assets
+/lib
+/font-build

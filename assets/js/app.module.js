@@ -1,3 +1,5 @@
+const COFFE_BREAK = '☕';
+
 let app = angular.module('app', ['ui-notification'])
     .config(function (NotificationProvider) {
         NotificationProvider.setOptions({
@@ -75,7 +77,8 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
             });
     }
 
-    $scope.numbers = [1, 2, 3, 5, 8, 13, '☹️', '☕'];
+    $scope.COFFE_BREAK = COFFE_BREAK;
+    $scope.numbers = [1, 2, 3, 5, 8, 13, '☹️', COFFE_BREAK];
 
     // check current user
     //initCheck();
@@ -112,13 +115,37 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
             .then(() => $program.notify.ok('Se elimino al usuario ' + user.nombre));
     };
 
+    $scope.isNaN = isNaN;
     $scope.showingResults = () => $scope.currentTarjeta() && $scope.currentTarjeta().showingResults;
     $scope.getVotedCount = () => $program.allUsers.count(m => m.hasVoted($scope.currentTarjeta()));
-    $scope.getVotedAvg = () => $scope.showingResults() ? $scope.getPuntajeTarjeta($scope.currentTarjeta()) : '';
+    $scope.getVotedAvg = () => $scope.showingResults() ? $scope.getCardScore() : '';
     $scope.isAdmin = () => $program.getCurrentUserIsAdmin();
     $scope.oldTarjetas = () => $program.allCards.filter(m => !m.activo) || [];
     $scope.checkCardResult = (number) => $scope.showingResults() && $program.allUsers.any(m => m.getScore($scope.currentTarjeta()) === number);
     $scope.checkResult = (user) => $scope.showingResults() && user && user.hasVoted($scope.currentTarjeta());
+
+    $scope.getUserScore = (user) => {
+        if ($scope.getSomeVotedBreak()) {
+            return COFFE_BREAK;
+        }
+
+        return user.getScore($scope.currentTarjeta());
+    }
+
+    $scope.getCardScore = () => {
+        if ($scope.getSomeVotedBreak()) {
+            return COFFE_BREAK;
+        }
+
+        return $scope.getPuntajeTarjeta($scope.currentTarjeta());
+    }
+
+    $scope.getSomeVotedBreak = () => {
+        const currentCard = $scope.currentTarjeta();
+        const someVotedBreak = !!$scope.activeUsers().find(u => u.getScore(currentCard) == COFFE_BREAK);
+
+        return someVotedBreak;
+    }
 
     $scope.logout = () => {
         $program.removeUser($scope.currentUser())
@@ -209,13 +236,18 @@ app.controller('appcontroller', function ($scope, $http, Notification) {
     };
 
     $scope.checkMaxMin = (user) => {
+        if ($scope.getSomeVotedBreak()) return false;
+
         let currentCard = $program.getCurrentCard();
-        let data = Enumerable.from($program.allUsers.map(m => m.getScore(currentCard))).where(m => m !== 0);
+        let data = Enumerable.from($program.allUsers.map(m => m.getScore(currentCard)))
+            .where(m => m !== 0 && !isNaN(m));
 
         if (!data.any()) return false;
 
-        let max = user.getScore(currentCard) === data.max();
-        let min = user.getScore(currentCard) === data.min();
+        const userScore = user.getScore(currentCard);
+
+        let max = userScore === data.max();
+        let min = userScore === data.min();
 
         let maxCount = $program.allUsers.count(m => m.getScore(currentCard) === data.max());
         let minCount = $program.allUsers.count(m => m.getScore(currentCard) === data.min());

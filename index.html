@@ -176,7 +176,7 @@
                                     <hr />
 
                                     <div class="row numbers-list">
-                                        <div class="col-3 {{ showingResults() ? 'disabled' : '' }}" ng-repeat="item in numbers" style="cursor: pointer">
+                                        <div class="col-3 {{ showingResults() ? 'disabled' : '' }} {{ isNaN(item) ? 'w-icon' : '' }}" ng-repeat="item in numbers" style="cursor: pointer">
                                             <div class="card mb-4 {{ checkCard(item) || checkCardResult(item) ? 'bg-info': '' }}" ng-click="puntuar(item)">
                                                 <div class="card-body text-center">
                                                     <h4 class="no-margin">
@@ -198,7 +198,7 @@
                                 <div class="grey-container">
 
                                     <h3>
-                                        <span class="badge badge-info ml-2 float-right" ng-hide="!showingResults()">most {{ getVotedAvg() }}</span>
+                                        <span class="badge badge-info badge-most ml-2 float-right" ng-hide="!showingResults() || isNaN(getVotedAvg())">most {{ getVotedAvg() }}</span>
                                         <span class="badge badge-info float-right">votes {{ getVotedCount() }} / {{activeUsers.length}}</span>
                                         Usuarios activos
                                     </h3>
@@ -220,9 +220,12 @@
                                                         <i class="far fa-times-circle text-danger mr-1"></i>
                                                     </button>
                                                 </div>
-                                                <div class="col-3 text-right">
+                                                <div class="col-3 text-center">
                                                     <i class="far fa-check-circle text-success" ng-hide="showingResults() || user.getScore(currentTarjeta()) == 0"></i>
-                                                    <span class="custom-badge bg-info float-right" ng-show="checkResult(user)">{{ user.getScore(currentTarjeta()) }}</span>
+                                                    <span>
+                                                        <i class="fa fa-hand-paper text-warning float-left" ng-show="showingResults() && user.getScore(currentTarjeta()) == COFFE_BREAK"></i>
+                                                        <span class="custom-badge d-inline-block {{isNaN(getUserScore(user)) ? 'w-icon' : 'bg-info'}}" ng-show="checkResult(user)">{{ getUserScore(user) }}</span>
+                                                    </span>
                                                 </div>
 
                                             </div>

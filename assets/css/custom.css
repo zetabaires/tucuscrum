@@ -49,6 +49,12 @@ body {
     text-align: center;
 }
 
+.custom-badge.w-icon {
+    font-size: 24px;
+    margin-left: -6px;
+    margin-top: 6px;
+}
+
 #top-nav .nav-notification .dropdown-menu {
     right: 0 !important;
     left: auto !important;
@@ -76,6 +82,15 @@ body {
 
 .numbers-list .card-body {
     border: dotted 2px #f0f0f0;
+}
+
+.numbers-list .w-icon .card-body {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.numbers-list .w-icon h4 {
+    font-size: 57px;
 }
 
 .disabled {
